@@ -37,6 +37,9 @@ void BMSModule::clearmodule()
   temperatures[0] = 0.0f;
   temperatures[1] = 0.0f;
   temperatures[2] = 0.0f;
+  temperatures[3] = 0.0f;
+  temperatures[4] = 0.0f;
+  temperatures[5] = 0.0f;
   exists = false;
   moduleAddress = 0;
 }
@@ -406,7 +409,7 @@ float BMSModule::getModuleVoltage()
 
 float BMSModule::getTemperature(int temp)
 {
-  if (temp < 0 || temp > 2) return 0.0f;
+  if (temp < 0 || temp > 5) return 0.0f;
   return temperatures[temp];
 }
 
