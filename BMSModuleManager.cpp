@@ -60,6 +60,10 @@ void BMSModuleManager::decodecan(CAN_message_t &msg)
   {
     Id = msg.id & 0x00F;
     CMU = (((msg.id & 0xFF0) - 0x600) >> 4);
+      Serial.print(CMU);
+      Serial.print('|');
+      Serial.print(Id);
+      Serial.print('|');
   }
   modules[CMU].setExists(true);
   modules[CMU].decodecan(Id, msg);

@@ -49,28 +49,28 @@ void BMSModule::decodecan(int Id, CAN_message_t &msg)
       balstat = msg.buf[0];
       temperatures[0] = msg.buf[2];
       temperatures[1] = msg.buf[3];
-      cellVolt[0] = (msg.buf[4] * 256 + msg.buf[5]) * 0.001;
-      cellVolt[1] = (msg.buf[6] * 256 + msg.buf[7]) * 0.001;
+      cellVolt[0] = (msg.buf[4] * 256 + msg.buf[5]) * 0.01;
+      cellVolt[1] = (msg.buf[6] * 256 + msg.buf[7]) * 0.01;
       break;
 
     case 0x2:
       temperatures[2] = msg.buf[2];
       temperatures[3] = msg.buf[3];
-      cellVolt[2] = (msg.buf[4] * 256 + msg.buf[5]) * 0.001;
-      cellVolt[3] = (msg.buf[6] * 256 + msg.buf[7]) * 0.001;
+      cellVolt[2] = (msg.buf[4] * 256 + msg.buf[5]) * 0.01;
+      cellVolt[3] = (msg.buf[6] * 256 + msg.buf[7]) * 0.01;
       break;
 
     case 0x3:
       temperatures[4] = msg.buf[2];
       temperatures[5] = msg.buf[3];
-      cellVolt[4] = (msg.buf[4] * 256 + msg.buf[5]) * 0.001;
-      cellVolt[5] = (msg.buf[6] * 256 + msg.buf[7]) * 0.001;
+      cellVolt[4] = (msg.buf[4] * 256 + msg.buf[5]) * 0.01;
+      cellVolt[5] = (msg.buf[6] * 256 + msg.buf[7]) * 0.01;
 
       break;
 
     case 0x4:
-      cellVolt[6] = (msg.buf[4] * 256 + msg.buf[5]) * 0.001;
-      cellVolt[7] = (msg.buf[6] * 256 + msg.buf[7]) * 0.001;
+      cellVolt[6] = (msg.buf[4] * 256 + msg.buf[5]) * 0.01;
+      cellVolt[7] = (msg.buf[6] * 256 + msg.buf[7]) * 0.01;
 
       break;
 
