@@ -156,6 +156,7 @@ int outputcheck = 0; //check outputs
 int candebug = 0; //view can frames
 int gaugedebug = 0;
 int debugCur = 0;
+int CSVdebug =0;
 int menuload = 0;
 
 
@@ -558,6 +559,10 @@ void loop()
     {
       printbmsstat();
       bms.printPackDetails();
+    }
+    if (CSVdebug != 0)
+    {
+      bms.printAllCSV();
     }
     if (inputcheck != 0)
     {
@@ -1350,6 +1355,12 @@ void menu()
         incomingByte = 'd';
         break;
 
+      case '8':
+        menuload = 1;
+        CSVdebug = !CSVdebug;
+        incomingByte = 'd';
+        break;
+
       case 113: //q for quite menu
 
         menuload = 0;
@@ -2005,6 +2016,8 @@ void menu()
         SERIALCONSOLE.println(cellspresent);
         SERIALCONSOLE.print("7 - Gauge Debug :");
         SERIALCONSOLE.println(gaugedebug);
+        SERIALCONSOLE.print("8 - CSV Output :");
+        SERIALCONSOLE.println(CSVdebug);
         SERIALCONSOLE.println("q - Go back to menu");
         menuload = 4;
         break;
