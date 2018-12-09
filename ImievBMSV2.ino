@@ -19,6 +19,12 @@ EEPROMSettings settings;
 /////Version Identifier/////////
 int firmver = 181209;
 
+
+///Balance Can Time ///
+
+int balancetime = 40; //ms period for messages.
+
+
 //Curent filter//
 float filterFrequency = 5.0 ;
 FilterOnePole lowpassFilter( LOWPASS, filterFrequency );
@@ -113,7 +119,7 @@ int highconv = 285;
 float currentact, RawCur;
 float ampsecond;
 unsigned long lasttime;
-unsigned long looptime, looptime1, cleartime = 0; //ms
+unsigned long looptime, looptime1, cleartime,balancetimer = 0; //ms
 int currentsense = 14;
 int sensor = 1;
 
@@ -599,6 +605,10 @@ void loop()
         chargercomms();
       }
     }
+  }
+    if (millis() - balancetimer > balancetime)
+  {
+    BalanceCan(); // send balance message
   }
 }
 
@@ -1172,6 +1182,10 @@ void VEcan() //communication with Victron system over CAN
   msg.buf[7] = bmsmanu[7];
   Can0.write(msg);
 
+}
+
+void BalanceCan()
+{
   if (balancecells == 1)
   {
     if (bms.getLowCellVolt() + settings.balanceHyst < bms.getHighCellVolt())
@@ -1188,16 +1202,15 @@ void VEcan() //communication with Victron system over CAN
         msg.buf[0] = highByte(uint16_t(bms.getLowCellVolt() * 100));
         msg.buf[1] = lowByte(uint16_t(bms.getLowCellVolt() * 100));
       }
-      msg.buf[2] =  0x01;
-      msg.buf[3] =  0x00;
-      msg.buf[4] =  0x00;
-      msg.buf[5] =  0x00;
-      msg.buf[6] =  0x00;
+      msg.buf[2] = 0x01;
+      msg.buf[3] = 0x00;
+      msg.buf[4] = 0x00;
+      msg.buf[5] = 0x00;
+      msg.buf[6] = 0x00;
       msg.buf[7] = 0x00;
       Can0.write(msg);
     }
   }
-
 }
 
 void BMVmessage()//communication with the Victron Color Control System over VEdirect
