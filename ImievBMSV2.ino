@@ -17,7 +17,7 @@ EEPROMSettings settings;
 
 
 /////Version Identifier/////////
-int firmver = 181208;
+int firmver = 181209;
 
 //Curent filter//
 float filterFrequency = 5.0 ;
@@ -1465,7 +1465,7 @@ void menu()
           settings.IgnoreVolt = Serial.parseInt();
           settings.IgnoreVolt = settings.IgnoreVolt * 0.001;
           bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt);
- // Serial.println(settings.IgnoreVolt);        
+          // Serial.println(settings.IgnoreVolt);
           menuload = 1;
           incomingByte = 'i';
         }
@@ -2299,6 +2299,15 @@ void currentlimit()
   {
     discurrent = 0;
 
+  }
+  ///No negative currents///
+  if (discurrent < 0)
+  {
+    discurrent = 0;
+  }
+  if (chargecurrent < 0)
+  {
+    chargecurrent = 0;
   }
 }
 
