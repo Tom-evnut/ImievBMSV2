@@ -22,7 +22,7 @@ int firmver = 181209;
 
 ///Balance Can Time ///
 
-int balancetime = 40; //ms period for messages.
+int balancetime = 10; //ms period for messages.
 
 
 //Curent filter//
@@ -119,7 +119,7 @@ int highconv = 285;
 float currentact, RawCur;
 float ampsecond;
 unsigned long lasttime;
-unsigned long looptime, looptime1, cleartime,balancetimer = 0; //ms
+unsigned long looptime, looptime1, cleartime, balancetimer = 0; //ms
 int currentsense = 14;
 int sensor = 1;
 
@@ -156,7 +156,7 @@ int outputcheck = 0; //check outputs
 int candebug = 0; //view can frames
 int gaugedebug = 0;
 int debugCur = 0;
-int CSVdebug =0;
+int CSVdebug = 0;
 int menuload = 0;
 
 
@@ -611,8 +611,9 @@ void loop()
       }
     }
   }
-    if (millis() - balancetimer > balancetime)
+  if (millis() - balancetimer > balancetime)
   {
+    balancetimer = millis();
     BalanceCan(); // send balance message
   }
 }
