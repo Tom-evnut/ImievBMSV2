@@ -17,7 +17,7 @@ EEPROMSettings settings;
 
 
 /////Version Identifier/////////
-int firmver = 190110;
+int firmver = 190113;
 
 
 ///Balance Can Time ///
@@ -158,6 +158,7 @@ int gaugedebug = 0;
 int debugCur = 0;
 int CSVdebug = 0;
 int menuload = 0;
+int debugdigits = 2; //amount of digits behind decimal for voltage reading
 
 
 ADC *adc = new ADC(); // adc object
@@ -587,7 +588,7 @@ void loop()
     if (debug != 0)
     {
       printbmsstat();
-      bms.printPackDetails();
+      bms.printPackDetails(debugdigits);
     }
     if (CSVdebug != 0)
     {
@@ -1434,7 +1435,6 @@ void BMVmessage()//communication with the Victron Color Control System over VEdi
 void menu()
 {
 
-
   incomingByte = Serial.read(); // read the incoming byte:
   if (menuload == 4)
   {
@@ -1494,6 +1494,19 @@ void menu()
       case '8':
         menuload = 1;
         CSVdebug = !CSVdebug;
+        incomingByte = 'd';
+        break;
+
+      case '9':
+        menuload = 1;
+        if (Serial.available() > 0)
+        {
+          debugdigits = Serial.parseInt();
+        }
+        if (debugdigits > 4)
+        {
+          debugdigits = 2;
+        }
         incomingByte = 'd';
         break;
 
@@ -2029,6 +2042,9 @@ void menu()
         break;
 
       case 'i': //Ignore Value Settings
+        while (Serial.available()) {
+          Serial.read();
+        }
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
@@ -2045,6 +2061,9 @@ void menu()
         break;
 
       case 'e': //Charging settings
+        while (Serial.available()) {
+          Serial.read();
+        }
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
@@ -2106,6 +2125,9 @@ void menu()
         break;
 
       case 'a': //Alarm and Warning settings
+        while (Serial.available()) {
+          Serial.read();
+        }
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
@@ -2128,6 +2150,9 @@ void menu()
         break;
 
       case 'k': //contactor settings
+        while (Serial.available()) {
+          Serial.read();
+        }
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
@@ -2155,6 +2180,9 @@ void menu()
         debug = 1;
         break;
       case 'd': //d for debug settings
+        while (Serial.available()) {
+          Serial.read();
+        }
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
@@ -2178,11 +2206,16 @@ void menu()
         SERIALCONSOLE.println(gaugedebug);
         SERIALCONSOLE.print("8 - CSV Output :");
         SERIALCONSOLE.println(CSVdebug);
+        SERIALCONSOLE.print("9 - Decimal Places to Show :");
+        SERIALCONSOLE.println(debugdigits);
         SERIALCONSOLE.println("q - Go back to menu");
         menuload = 4;
         break;
 
       case 99: //c for calibrate zero offset
+        while (Serial.available()) {
+          Serial.read();
+        }
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
@@ -2235,6 +2268,10 @@ void menu()
         break;
 
       case 98: //c for calibrate zero offset
+        while (Serial.available()) 
+        {
+          Serial.read();
+        }
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
         SERIALCONSOLE.println();
