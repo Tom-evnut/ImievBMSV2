@@ -17,7 +17,7 @@ EEPROMSettings settings;
 
 
 /////Version Identifier/////////
-int firmver = 190113;
+int firmver = 190119;
 
 
 ///Balance Can Time ///
@@ -445,6 +445,16 @@ void loop()
           contctrl = contctrl | 1;
         }
       }
+
+      if (bms.getLowCellVolt() < settings.UnderVSetpoint || bms.getHighCellVolt() > settings.OverVSetpoint || bms.getAvgTemperature() > settings.OverTSetpoint)
+      {
+        digitalWrite(OUT2, HIGH);//trip breaker
+      }
+      else
+      {
+        digitalWrite(OUT2, LOW);//trip breaker
+      }
+
       //pwmcomms();
     }
     else
@@ -1236,7 +1246,7 @@ void VEcan() //communication with Victron system over CAN
 {
   msg.id  = 0x351;
   msg.len = 8;
-    if (storagemode == 0)
+  if (storagemode == 0)
   {
     msg.buf[0] = lowByte(uint16_t((settings.ChargeVsetpoint * settings.Scells ) * 10));
     msg.buf[1] = highByte(uint16_t((settings.ChargeVsetpoint * settings.Scells ) * 10));
@@ -2268,7 +2278,7 @@ void menu()
         break;
 
       case 98: //c for calibrate zero offset
-        while (Serial.available()) 
+        while (Serial.available())
         {
           Serial.read();
         }
