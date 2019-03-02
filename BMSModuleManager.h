@@ -39,10 +39,11 @@ class BMSModuleManager
     /*
       void processCANMsg(CAN_FRAME &frame);
     */
-    void printAllCSV();
+    void printAllCSV(unsigned long timestamp,float current, int SOC);
     void printPackSummary();
     void printPackDetails(int digits);
 
+    bool checkcomms();
 
   private:
     float packVolt;                         // All modules added together

@@ -31,6 +31,32 @@ void BMSModuleManager::clearmodules()
   }
 }
 
+bool BMSModuleManager::checkcomms()
+{
+  int g = 0;
+  for (int y = 1; y < 63; y++)
+  {
+    if (modules[y].isExisting())
+    {
+      g = 1;
+      if (modules[y].isReset())
+      {
+        //Do nothing as the counter has been reset
+      }
+      else
+      {
+        return false;
+      }
+    }
+    modules[y].setReset(false);
+  }
+  if ( g == 0)
+  {
+    return false;
+  }
+  return true;
+}
+
 int BMSModuleManager::seriescells()
 {
   spack = 0;
@@ -421,12 +447,18 @@ void BMSModuleManager::printPackDetails(int digits)
   }
 }
 
-void BMSModuleManager::printAllCSV()
+void BMSModuleManager::printAllCSV(unsigned long timestamp, float current, int SOC)
 {
   for (int y = 1; y < 63; y++)
   {
     if (modules[y].isExisting())
     {
+      SERIALCONSOLE.print(timestamp);
+      SERIALCONSOLE.print(",");
+      SERIALCONSOLE.print(current, 0);
+      SERIALCONSOLE.print(",");
+      SERIALCONSOLE.print(SOC);
+      SERIALCONSOLE.print(",");
       SERIALCONSOLE.print(y);
       SERIALCONSOLE.print(",");
       for (int i = 0; i < 8; i++)
@@ -439,14 +471,32 @@ void BMSModuleManager::printAllCSV()
       SERIALCONSOLE.print(modules[y].getTemperature(1));
       SERIALCONSOLE.print(",");
       SERIALCONSOLE.print(modules[y].getTemperature(2));
-      SERIALCONSOLE.print(",");
-      SERIALCONSOLE.print(modules[y].getTemperature(3));
-      SERIALCONSOLE.print(",");
-      SERIALCONSOLE.print(modules[y].getTemperature(4));
-      SERIALCONSOLE.print(",");
-      SERIALCONSOLE.print(modules[y].getTemperature(5));
       SERIALCONSOLE.println();
     }
   }
+  for (int y = 1; y < 63; y++)
+  {
+    if (modules[y].isExisting())
+    {
+      Serial2.print(timestamp);
+      Serial2.print(",");
+      Serial2.print(current, 0);
+      Serial2.print(",");
+      Serial2.print(SOC);
+      Serial2.print(",");
+      Serial2.print(y);
+      Serial2.print(",");
+      for (int i = 0; i < 8; i++)
+      {
+        Serial2.print(modules[y].getCellVoltage(i));
+        Serial2.print(",");
+      }
+      Serial2.print(modules[y].getTemperature(0));
+      Serial2.print(",");
+      Serial2.print(modules[y].getTemperature(1));
+      Serial2.print(",");
+      Serial2.print(modules[y].getTemperature(2));
+      Serial2.println();
+    }
+  }
 }
-

@@ -74,6 +74,7 @@ byte bmsstatus = 0;
 
 
 int Discharge;
+int ErrorReason = 0;
 
 //variables for output control
 int pulltime = 1000;
@@ -159,7 +160,7 @@ int debugCur = 0;
 int CSVdebug = 0;
 int menuload = 0;
 int debugdigits = 2; //amount of digits behind decimal for voltage reading
-
+int Charged = 0;
 
 ADC *adc = new ADC(); // adc object
 void loadSettings()
@@ -364,10 +365,8 @@ void loop()
   if (outputcheck != 1)
   {
     contcon();
-
     if (settings.ESSmode == 1)
     {
-      bmsstatus = Boot;
       contctrl = contctrl | 4; //turn on negative contactor
 
 
@@ -403,11 +402,14 @@ void loop()
           digitalWrite(OUT3, LOW);//turn off charger
           contctrl = contctrl & 253;
           Pretimer = millis();
+          Charged = 1;
+          SOCcharged(2);
         }
         else
         {
-          if (bms.getHighCellVolt() < (settings.StoreVsetpoint - settings.ChargeHys))
+          if (Charged == 1 && bms.getHighCellVolt() < (settings.StoreVsetpoint - settings.ChargeHys))
           {
+            Charged = 0;
             digitalWrite(OUT3, HIGH);//turn on charger
             if (Pretimer + settings.Pretime < millis())
             {
@@ -424,11 +426,14 @@ void loop()
           digitalWrite(OUT3, LOW);//turn off charger
           contctrl = contctrl & 253;
           Pretimer = millis();
+          Charged = 1;
+          SOCcharged(2);
         }
         else
         {
-          if (bms.getHighCellVolt() < (settings.ChargeVsetpoint - settings.ChargeHys))
+          if (Charged == 1 && bms.getHighCellVolt() < (settings.ChargeVsetpoint - settings.ChargeHys))
           {
+            Charged = 0;
             digitalWrite(OUT3, HIGH);//turn on charger
             if (Pretimer + settings.Pretime < millis())
             {
@@ -548,6 +553,14 @@ void loop()
           }
           if (bms.getHighCellVolt() > settings.ChargeVsetpoint)
           {
+            if (bms.getAvgCellVolt() > (settings.ChargeVsetpoint - settings.ChargeHys))
+            {
+              SOCcharged(2);
+            }
+            else
+            {
+              SOCcharged(1);
+            }
             digitalWrite(OUT3, LOW);//turn off charger
             bmsstatus = Ready;
           }
@@ -592,17 +605,21 @@ void loop()
 
   if (millis() - looptime > 500)
   {
-
     looptime = millis();
     bms.getAllVoltTemp();
-
     //UV  check
     if (settings.ESSmode == 1)
     {
-      if (bms.getLowCellVolt() < settings.UnderVSetpoint || bms.getHighCellVolt() < settings.UnderVSetpoint)
+      if (SOCset != 0)
       {
-
-        bmsstatus = Error;
+        if (bms.getLowCellVolt() < settings.UnderVSetpoint || bms.getHighCellVolt() < settings.UnderVSetpoint)
+        {
+          SERIALCONSOLE.println("  ");
+          SERIALCONSOLE.print("   !!! Undervoltage Fault !!!");
+          SERIALCONSOLE.println("  ");
+          bmsstatus = Error;
+          ErrorReason = 1;
+        }
       }
     }
     else //In 'vehicle' mode
@@ -612,6 +629,7 @@ void loop()
         if (UnderTime > millis()) //check is last time not undervoltage is longer thatn UnderDur ago
         {
           bmsstatus = Error;
+          ErrorReason = 2;
         }
       }
       else
@@ -620,7 +638,6 @@ void loop()
       }
     }
 
-
     if (debug != 0)
     {
       printbmsstat();
@@ -628,7 +645,7 @@ void loop()
     }
     if (CSVdebug != 0)
     {
-      bms.printAllCSV();
+      bms.printAllCSV(millis(), currentact, SOC);
     }
     if (inputcheck != 0)
     {
@@ -656,17 +673,47 @@ void loop()
     {
       if (cellspresent != bms.seriescells()) //detect a fault in cells detected
       {
+        SERIALCONSOLE.println("  ");
+        SERIALCONSOLE.print("   !!! Series Cells Fault !!!");
+        SERIALCONSOLE.println("  ");
         bmsstatus = Error;
+        ErrorReason = 3;
       }
     }
     alarmupdate();
-    dashupdate();
+    if (CSVdebug != 1)
+    {
+      dashupdate();
+    }
 
     resetwdog();
   }
   if (millis() - cleartime > 5000)
   {
     //bms.clearmodules(); // Not functional
+    if (bms.checkcomms())
+    {
+      //no missing modules
+      /*
+        SERIALCONSOLE.println("  ");
+        SERIALCONSOLE.print(" ALL OK NO MODULE MISSING :) ");
+        SERIALCONSOLE.println("  ");
+      */
+      if (  bmsstatus == Error)
+      {
+        bmsstatus = Boot;
+      }
+    }
+    else
+    {
+      //missing module
+      SERIALCONSOLE.println("  ");
+      SERIALCONSOLE.print("   !!! MODULE MISSING !!!");
+      SERIALCONSOLE.println("  ");
+      bmsstatus = Error;
+      ErrorReason = 4;
+    }
+    cleartime = millis();
   }
   if (millis() - looptime1 > settings.chargerspd)
   {
@@ -682,11 +729,6 @@ void loop()
         chargercomms();
       }
     }
-  }
-  if (millis() - balancetimer > balancetime)
-  {
-    balancetimer = millis();
-    BalanceCan(); // send balance message
   }
 }
 
@@ -1111,6 +1153,19 @@ void updateSOC()
     SERIALCONSOLE.print(ampsecond * 0.27777777777778, 2);
     SERIALCONSOLE.println ("mAh");
 
+  }
+}
+
+void SOCcharged(int y)
+{
+  if (y == 1)
+  {
+    SOC = 95;
+    ampsecond = (settings.CAP * settings.Pstrings * 1000) / 0.27777777777778 ; //reset to full, dependant on given capacity. Need to improve with auto correction for capcity.
+  }
+  if (y == 2)
+  {
+    SOC = 100;
   }
 }
 
@@ -2589,54 +2644,54 @@ void currentlimit()
         }
       }
     }
-  }
-  ///voltage influence on current///
-  if (storagemode == 1)
-  {
-    if (bms.getHighCellVolt() > (settings.StoreVsetpoint - settings.ChargeHys))
+    ///voltage influence on current///
+    if (storagemode == 1)
     {
-      chargecurrent = map(bms.getHighCellVolt(), (settings.StoreVsetpoint - settings.ChargeHys), settings.StoreVsetpoint, settings.chargecurrentmax, settings.chargecurrentend);
-    }
-    if (bms.getHighCellVolt() > settings.OverVSetpoint)
-    {
-      chargecurrent = 0;
-    }
-  }
-  else
-  {
-    if (bms.getHighCellVolt() > (settings.ChargeVsetpoint - settings.ChargeHys))
-    {
-      chargecurrent = map(bms.getHighCellVolt(), (settings.ChargeVsetpoint - settings.ChargeHys), settings.ChargeVsetpoint, settings.chargecurrentmax, settings.chargecurrentend);
-    }
-    if (bms.getHighCellVolt() > settings.OverVSetpoint)
-    {
-      chargecurrent = 0;
-    }
-  }
-
-  if (bms.getLowCellVolt() < settings.UnderVSetpoint || bms.getLowCellVolt() < settings.DischVsetpoint)
-  {
-    discurrent = 0;
-  }
-  else
-  {
-    if (bms.getLowCellVolt() > (settings.DischVsetpoint + settings.DisTaper))
-    {
-      discurrent = settings.discurrentmax;
+      if (bms.getHighCellVolt() > (settings.StoreVsetpoint - settings.ChargeHys))
+      {
+        chargecurrent = map(bms.getHighCellVolt(), (settings.StoreVsetpoint - settings.ChargeHys), settings.StoreVsetpoint, settings.chargecurrentmax, settings.chargecurrentend);
+      }
+      if (bms.getHighCellVolt() > settings.OverVSetpoint)
+      {
+        chargecurrent = 0;
+      }
     }
     else
     {
-      discurrent = map(bms.getLowCellVolt(), settings.DischVsetpoint, (settings.DischVsetpoint + settings.DisTaper), 0, settings.chargecurrentmax);
+      if (bms.getHighCellVolt() > (settings.ChargeVsetpoint - settings.ChargeHys))
+      {
+        chargecurrent = map(bms.getHighCellVolt(), (settings.ChargeVsetpoint - settings.ChargeHys), settings.ChargeVsetpoint, settings.chargecurrentmax, settings.chargecurrentend);
+      }
+      if (bms.getHighCellVolt() > settings.OverVSetpoint)
+      {
+        chargecurrent = 0;
+      }
     }
-  }
-  ///No negative currents///
-  if (discurrent < 0)
-  {
-    discurrent = 0;
-  }
-  if (chargecurrent < 0)
-  {
-    chargecurrent = 0;
+
+    if (bms.getLowCellVolt() < settings.UnderVSetpoint || bms.getLowCellVolt() < settings.DischVsetpoint)
+    {
+      discurrent = 0;
+    }
+    else
+    {
+      if (bms.getLowCellVolt() > (settings.DischVsetpoint + settings.DisTaper))
+      {
+        discurrent = settings.discurrentmax;
+      }
+      else
+      {
+        discurrent = map(bms.getLowCellVolt(), settings.DischVsetpoint, (settings.DischVsetpoint + settings.DisTaper), 0, settings.chargecurrentmax);
+      }
+    }
+    ///No negative currents///
+    if (discurrent < 0)
+    {
+      discurrent = 0;
+    }
+    if (chargecurrent < 0)
+    {
+      chargecurrent = 0;
+    }
   }
 }
 
