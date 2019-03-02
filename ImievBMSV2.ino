@@ -5,7 +5,7 @@
 #include "Logger.h"
 #include <ADC.h> //https://github.com/pedvide/ADC
 #include <EEPROM.h>
-#include <FlexCAN.h> //https://github.com/teachop/FlexCAN_Library 
+#include <FlexCAN.h> https://github.com/collin80/FlexCAN_Library  
 #include <SPI.h>
 #include <Filters.h>//https://github.com/JonHub/Filters
 
@@ -17,7 +17,7 @@ EEPROMSettings settings;
 
 
 /////Version Identifier/////////
-int firmver = 190215;
+int firmver = 190302;
 
 
 ///Balance Can Time ///
@@ -559,6 +559,11 @@ void loop()
 
         case (Error):
           Discharge = 0;
+          digitalWrite(OUT4, LOW);
+          digitalWrite(OUT3, LOW);//turn off charger
+          digitalWrite(OUT2, LOW);
+          digitalWrite(OUT1, LOW);//turn off discharge
+          contctrl = 0; //turn off out 5 and 6
           /*
                     if (digitalRead(IN3) == HIGH) //detect AC present for charging
                     {
