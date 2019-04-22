@@ -34,6 +34,7 @@ void BMSModuleManager::clearmodules()
 bool BMSModuleManager::checkcomms()
 {
   int g = 0;
+  /*
   for (int y = 1; y < 63; y++)
   {
     if (modules[y].isExisting())
@@ -54,6 +55,7 @@ bool BMSModuleManager::checkcomms()
   {
     return false;
   }
+  */
   return true;
 }
 
