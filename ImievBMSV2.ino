@@ -254,7 +254,7 @@ void setup()
   analogWriteFrequency(OUT8, pwmfreq);
 
   Can0.begin(500000);
-  /*
+
   //set filters for standard
   for (int i = 0; i < 8; i++)
   {
@@ -269,7 +269,7 @@ void setup()
     filter.flags.extended = 1;
     Can0.setFilter(filter, i);
   }
-*/
+
   //if using enable pins on a transceiver they need to be set on
 
 
