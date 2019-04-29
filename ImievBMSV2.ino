@@ -17,7 +17,7 @@ EEPROMSettings settings;
 
 
 /////Version Identifier/////////
-int firmver = 190404;
+int firmver = 190428;
 
 
 ///Balance Can Time ///
@@ -70,6 +70,7 @@ byte bmsstatus = 0;
 #define Eltek 3
 #define Elcon 4
 #define Victron 5
+#define Coda 6
 //
 
 
@@ -100,7 +101,7 @@ uint16_t SOH = 100; // SOH place holder
 unsigned char alarm[4], warning[4] = {0, 0, 0, 0};
 unsigned char mes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 unsigned char bmsname[8] = {'S', 'I', 'M', 'P', ' ', 'B', 'M', 'S'};
-unsigned char bmsmanu[8] = {'T', 'O', 'M', ' ', 'D', 'E', ' ', 'B'};
+unsigned char bmsmanu[8] = {'S', 'I', 'M', 'P', ' ', 'E', 'C', 'O'};
 long unsigned int rxId;
 unsigned char len = 0;
 byte rxBuf[8];
@@ -253,7 +254,7 @@ void setup()
   analogWriteFrequency(OUT8, pwmfreq);
 
   Can0.begin(500000);
-
+  /*
   //set filters for standard
   for (int i = 0; i < 8; i++)
   {
@@ -268,7 +269,7 @@ void setup()
     filter.flags.extended = 1;
     Can0.setFilter(filter, i);
   }
-
+*/
   //if using enable pins on a transceiver they need to be set on
 
 
@@ -1613,6 +1614,7 @@ void BMVmessage()//communication with the Victron Color Control System over VEdi
 
 
 // Settings menu
+// Settings menu
 void menu()
 {
 
@@ -1947,7 +1949,7 @@ void menu()
 
       case '5': //1 Over Voltage Setpoint
         settings.chargertype = settings.chargertype + 1;
-        if (settings.chargertype > 5)
+        if (settings.chargertype > 6)
         {
           settings.chargertype = 0;
         }
@@ -2309,6 +2311,9 @@ void menu()
             break;
           case 5:
             SERIALCONSOLE.print("Victron/SMA");
+            break;
+                      case 6:
+            SERIALCONSOLE.print("Coda");
             break;
         }
         SERIALCONSOLE.println();
