@@ -38,7 +38,7 @@ EEPROMSettings settings;
 
 
 /////Version Identifier/////////
-int firmver = 190428;
+int firmver = 190528;
 
 
 ///Balance Can Time ///
@@ -729,13 +729,14 @@ void loop()
     currentlimit();
     VEcan();
 
-    if (cellspresent == 0)
+        if (cellspresent == 0 && SOCset == 1)
     {
-      cellspresent = bms.seriescells();//set amount of connected cells, might need delay
+      cellspresent = bms.seriescells();
+      bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt);
     }
     else
     {
-      if (cellspresent != bms.seriescells()) //detect a fault in cells detected
+      if (cellspresent != bms.seriescells() || cellspresent != (settings.Scells * settings.Pstrings)) //detect a fault in cells detected
       {
         SERIALCONSOLE.println("  ");
         SERIALCONSOLE.print("   !!! Series Cells Fault !!!");
