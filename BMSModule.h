@@ -37,6 +37,7 @@ class BMSModule
     void setReset(bool ex);
     void settempsensor(int tempsensor);
     void setIgnoreCell(float Ignore);
+    void setOffset(float Offset);
     
     
   private:
@@ -50,6 +51,7 @@ class BMSModule
     float lowestModuleVolt;
     float highestModuleVolt;
     float IgnoreCell;
+    float CellOffset;
     bool exists;
     bool reset;
     int alerts;

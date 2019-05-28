@@ -58,6 +58,7 @@ typedef struct {
   float DisTSetpoint;
   float WarnToff;
   float CellGap;
+  float VoltageOffset;
   uint8_t IgnoreTemp;
   float IgnoreVolt;
   float balanceVoltage;

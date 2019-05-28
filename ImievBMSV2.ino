@@ -9,7 +9,7 @@
   the following conditions:
   The above copyright notice and this permission notice shall be included
   in all copies or substantial portions of the Software.
-  
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -240,6 +240,7 @@ void loadSettings()
   settings.UnderDur = 5000; //ms of allowed undervoltage before throwing open stopping discharge.
   settings.CurDead = 5;// mV of dead band on current sensor
   settings.ChargerDirect = 1; //1 - charger is always connected to HV battery // 0 - Charger is behind the contactors
+  settings.VoltageOffset = 0; //Amount of correction needed on cell voltages
 }
 
 
@@ -366,7 +367,7 @@ void setup()
   bms.findBoards();
   digitalWrite(led, HIGH);
   bms.setPstrings(settings.Pstrings);
-  bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt);
+  bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt, settings.VoltageOffset);
 
   ///precharge timer kickers
   Pretimer = millis();
@@ -729,10 +730,10 @@ void loop()
     currentlimit();
     VEcan();
 
-        if (cellspresent == 0 && SOCset == 1)
+    if (cellspresent == 0 && SOCset == 1)
     {
       cellspresent = bms.seriescells();
-      bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt);
+      bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt, settings.VoltageOffset);
     }
     else
     {
@@ -1184,7 +1185,7 @@ void updateSOC()
   {
     if (millis() > 9000)
     {
-      bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt);
+      bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt, settings.VoltageOffset);
     }
     if (millis() > 10000)
     {
@@ -1842,7 +1843,7 @@ void menu()
         {
           settings.IgnoreTemp = 0;
         }
-        bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt);
+        bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt, settings.VoltageOffset);
         menuload = 1;
         incomingByte = 'i';
         break;
@@ -1852,7 +1853,19 @@ void menu()
         {
           settings.IgnoreVolt = Serial.parseInt();
           settings.IgnoreVolt = settings.IgnoreVolt * 0.001;
-          bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt);
+          bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt, settings.VoltageOffset);
+          // Serial.println(settings.IgnoreVolt);
+          menuload = 1;
+          incomingByte = 'i';
+        }
+        break;
+
+      case '3':
+        if (Serial.available() > 0)
+        {
+          settings.VoltageOffset = Serial.parseInt();
+          settings.VoltageOffset = settings.VoltageOffset * 0.001;
+          bms.setSensors(settings.IgnoreTemp, settings.IgnoreVolt, settings.VoltageOffset);
           // Serial.println(settings.IgnoreVolt);
           menuload = 1;
           incomingByte = 'i';
@@ -2285,6 +2298,10 @@ void menu()
         SERIALCONSOLE.print("2 - Voltage Under Which To Ignore Cells:");
         SERIALCONSOLE.print(settings.IgnoreVolt * 1000, 0);
         SERIALCONSOLE.println("mV");
+        SERIALCONSOLE.print("3 - Cell Voltage Measurement Offset:");
+        SERIALCONSOLE.print(settings.VoltageOffset * 1000, 0);
+        SERIALCONSOLE.println("mV");
+
         SERIALCONSOLE.println("q - Go back to menu");
         menuload = 8;
         break;
