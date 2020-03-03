@@ -41,7 +41,7 @@ class BMSModuleManager
     */
     void printAllCSV(unsigned long timestamp,float current, int SOC);
     void printPackSummary();
-    void printPackDetails(int digits);
+    void printPackDetails(int digits, bool showbal);
 
     bool checkcomms();
 
@@ -61,6 +61,10 @@ class BMSModuleManager
     int numFoundModules;                    // The number of modules that seem to exist
     bool isFaulted;
     int spack;
+        float ignorevolt;
+    int tempsens;
+    float tempconv;
+    int tempoff;
     /*
       void sendBatterySummary();
       void sendModuleSummary(int module);

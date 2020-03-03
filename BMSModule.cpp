@@ -244,6 +244,11 @@ float BMSModule::getCellVoltage(int cell)
   return cellVolt[cell];
 }
 
+uint8_t BMSModule::getBalStat()
+{
+  return balstat;
+}
+
 float BMSModule::getLowCellV()
 {
   float lowVal = 10.0f;

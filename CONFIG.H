@@ -11,7 +11,7 @@
 #define SERIALBMS  Serial3
 
 // victron serial VE direct bus config
-#define VE Serial2
+#define canSerial Serial2
 
 #define REG_DEV_STATUS      1
 #define REG_GPAI            1
@@ -36,7 +36,7 @@
 
 #define MAX_MODULE_ADDR     0x3E
 
-#define EEPROM_VERSION      0x10    //update any time EEPROM struct below is changed.
+#define EEPROM_VERSION      0x13    //update any time EEPROM struct below is changed.
 #define EEPROM_PAGE         0
 
 typedef struct {
@@ -58,7 +58,6 @@ typedef struct {
   float DisTSetpoint;
   float WarnToff;
   float CellGap;
-  float VoltageOffset;
   uint8_t IgnoreTemp;
   float IgnoreVolt;
   float balanceVoltage;
@@ -66,17 +65,19 @@ typedef struct {
   int Scells;
   int Pstrings;
   int CAP;
-  int chargecurrentmax;
-  int chargecurrentend;
-  int discurrentmax ;
+  int16_t chargecurrentmax;
+  int16_t chargecurrentend;
+  int16_t discurrentmax ;
   int socvolt[4];
   int invertcur;
   int cursens;
+  int curcan;
   int voltsoc;
   uint16_t offset1;
   uint16_t offset2;
   float convhigh;
   float convlow;
+  int32_t changecur;
   int Pretime;
   int conthold;
   int Precurrent;
@@ -90,4 +91,9 @@ typedef struct {
   uint16_t CurDead;
   float DisTaper;
   bool ChargerDirect;
+  float TempConv;
+  int TempOff;
+  bool SerialCan;
+  uint32_t EngIn;
+  uint32_t EngOut;
 } EEPROMSettings;

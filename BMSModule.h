@@ -29,6 +29,7 @@ class BMSModule
     uint8_t getAlerts();
     uint8_t getCOVCells();
     uint8_t getCUVCells();
+    uint8_t getBalStat();
     void setAddress(int newAddr);
     int getAddress();
     bool isExisting();
