@@ -26,6 +26,8 @@ BMSModule::BMSModule()
   exists = false;
   reset = false;
   moduleAddress = 0;
+  CellOffset = 2.1;
+  TempOffset = -50;
 }
 
 void BMSModule::clearmodule()
@@ -52,22 +54,22 @@ void BMSModule::decodecan(int Id, CAN_message_t &msg)
   {
     case 0x1:
       balstat = msg.buf[0];
-      temperatures[0] = msg.buf[2] - 50;
-      temperatures[1] = msg.buf[3] - 50;
+      temperatures[0] = msg.buf[2] + TempOffset;
+      temperatures[1] = msg.buf[3] + TempOffset;
       cellVolt[0] = (msg.buf[4] * 256 + msg.buf[5]) * 0.01 + CellOffset;
       cellVolt[1] = (msg.buf[6] * 256 + msg.buf[7]) * 0.01 + CellOffset;
       break;
 
     case 0x2:
-      temperatures[2] = msg.buf[1] - 50;
-      temperatures[3] = msg.buf[2] - 50;
+      temperatures[2] = msg.buf[1] + TempOffset;
+      temperatures[3] = msg.buf[2] + TempOffset;
       cellVolt[2] = (msg.buf[4] * 256 + msg.buf[5]) * 0.01 + CellOffset;
       cellVolt[3] = (msg.buf[6] * 256 + msg.buf[7]) * 0.01 + CellOffset;
       break;
 
     case 0x3:
-      temperatures[4] = msg.buf[1] - 50;
-      temperatures[5] = msg.buf[2] - 50;
+      temperatures[4] = msg.buf[1] + TempOffset;
+      temperatures[5] = msg.buf[2] + TempOffset;
       cellVolt[4] = (msg.buf[4] * 256 + msg.buf[5]) * 0.01 + CellOffset;
       cellVolt[5] = (msg.buf[6] * 256 + msg.buf[7]) * 0.01 + CellOffset;
 
@@ -461,7 +463,8 @@ void BMSModule::setIgnoreCell(float Ignore)
   IgnoreCell = Ignore;
 }
 
-void BMSModule::setOffset(float Offset)
+void BMSModule::setOffset(float TOffset, float VOffset)
 {
-  CellOffset = Offset;
+  TempOffset = TOffset;
+  CellOffset = VOffset;
 }

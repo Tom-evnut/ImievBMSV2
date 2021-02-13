@@ -75,17 +75,6 @@ int BMSModuleManager::seriescells()
 void BMSModuleManager::decodecan(CAN_message_t &msg)
 {
   int Id, CMU = 0;
-  if ((msg.id & 0x80000000) == 0x80000000)
-  {
-    CMU = (((msg.id & 0x00000FF0) - 0x600) >> 4);
-    Id = msg.id & 0x00F;
-    Serial.println();
-    Serial.print("Long ID recieved :");
-    Serial.print(msg.id & 0x80000000);
-    Serial.println();
-  }
-  else
-  {
     Id = msg.id & 0x00F;
     CMU = (((msg.id & 0xFF0) - 0x600) >> 4);
     /* debugging
@@ -94,7 +83,6 @@ void BMSModuleManager::decodecan(CAN_message_t &msg)
       Serial.print(Id);
       Serial.print('|');
     */
-  }
   modules[CMU].setExists(true);
   modules[CMU].decodecan(Id, msg);
 }
@@ -183,7 +171,7 @@ void BMSModuleManager::setPstrings(int Pstrings)
   Pstring = Pstrings;
 }
 
-void BMSModuleManager::setSensors(int sensor, float Ignore, float tempoffin)
+void BMSModuleManager::setSensors(int sensor, float Ignore, float tempoffin, float celloff)
 {
   tempsens = sensor;
   ignorevolt = Ignore;
@@ -195,9 +183,11 @@ void BMSModuleManager::setSensors(int sensor, float Ignore, float tempoffin)
     {
       modules[x].settempsensor(sensor);
       modules[x].setIgnoreCell(Ignore);
-      modules[x].setOffset (tempoffin);
+      modules[x].setOffset (tempoffin, celloff);
     }
   }
+  Serial.println();
+  Serial.println("Ran Setup Offsets");
 }
 
 float BMSModuleManager::getAvgTemperature()
